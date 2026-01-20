@@ -1,13 +1,15 @@
-"use client"
-
-import { generateDeck } from "@/lib/GenerateDeck";
-import { useEffect } from "react";
+import { Game } from "@/lib/GenerateDeck";
+import Player from "./player";
 
 export default function Home() {
-  useEffect(() => {
-    generateDeck();
-  }, [])
+  const game: Game = new Game();
+  game.initializeGame();
+
+  async function hit() {
+    'use server'
+    console.log("test");
+  }
   return (
-    <h1>siemanko</h1>
+    <Player playerCards={[2]}></Player>
   );
 }

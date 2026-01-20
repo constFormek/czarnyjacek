@@ -1,34 +1,38 @@
-
 export class Game {
-    private cardShoe: number[] = [];
-    private shoeCount: number = 6;
-    public shoeCut: number = 0;
+  public cardShoe: number[] = [];
+  private shoeCount: number = 6;
+  public shoeCut: number = 0;
 
-    private generateShoe = () => {
-        for (let i = 0; i < this.shoeCount; i++) {
-            for (let j = 0; j < 52; j++) {
-                this.cardShoe.push(j);
-            }
-        }
-
-        this.shuffleShoe();
+  private generateShoe = () => {
+    for (let i = 0; i < this.shoeCount; i++) {
+      for (let j = 0; j < 52; j++) {
+        this.cardShoe.push(j);
+      }
     }
 
-    private shuffleShoe = () =>{
-        let currentIndex = this.cardShoe.length;
+    this.shuffleShoe();
 
-        while (currentIndex != 0) {
-            const randomIndex = Math.floor(Math.random() * currentIndex);
-            currentIndex--;
-            [this.cardShoe[currentIndex], this.cardShoe[randomIndex]] = [this.cardShoe[randomIndex], this.cardShoe[currentIndex]];
-        }
-    }
+    this.shoeCount;
+  };
 
-    public initializeGame = () => {
-        this.generateShoe();
-    }
+  private shuffleShoe = () => {
+    let currentIndex = this.cardShoe.length;
 
-    async kiwka() {
-        'use server'
+    while (currentIndex != 0) {
+      const randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+      [this.cardShoe[currentIndex], this.cardShoe[randomIndex]] = [
+        this.cardShoe[randomIndex],
+        this.cardShoe[currentIndex],
+      ];
     }
+  };
+  public playerCards: number[] = [1, 2, 3];
+  public addCard = (n: number) => {
+    this.playerCards.push(n);
+  };
+
+  public initializeGame = () => {
+    this.generateShoe();
+  };
 }
