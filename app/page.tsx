@@ -5,8 +5,9 @@ import { currPlayer, tableCards } from "@/lib/GameLogic";
 export default function Home() {
   return (
     <>
-      <Player currPlayer={currPlayer} playerCards={tableCards[0]}></Player>
       <Dealer dealerCards={tableCards[1]}></Dealer>
+      <hr />
+      <Player currPlayer={currPlayer} playerCards={tableCards[0]}></Player>
     </>
   );
 }

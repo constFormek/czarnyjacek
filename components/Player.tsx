@@ -1,6 +1,6 @@
 "use client";
 import { doubleAction, hitAction, standAction } from "@/lib/actions";
-import { translateCard } from "@/lib/GameLogic";
+import { translateCard, displayCardSum } from "@/lib/GameLogic";
 
 interface PlayerProps {
   playerCards: number[],
@@ -11,7 +11,7 @@ export default function Player({ playerCards, currPlayer }: PlayerProps) {
   return (
     <>
       <div>
-        <p>player:</p>
+        <p>player: {displayCardSum(playerCards)}</p>
         {playerCards.map((card, i) => (
           <p key={i}>{translateCard(card)}</p>
         ))}

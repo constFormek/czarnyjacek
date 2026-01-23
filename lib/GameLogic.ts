@@ -55,6 +55,40 @@ export const translateCard = (card: number) => {
     return cardRanks[cardRank] + " of " + cardSuits[cardSuit];
 }
 
+const sumCardValues = (cardArray: number[]) => {
+  let cardValueSum: number = 0;
+  for (let i = 0; i < cardArray.length; i++) {
+    const card: number = cardArray[i];
+    const cardRank: number = card % 13;
+    if (cardRank == 0) {
+      cardValueSum += 1;
+      continue;
+    }
+    if (cardRank > 9) {
+      cardValueSum += 10;
+      continue;
+    }
+    cardValueSum += cardRank + 1;
+  }
+
+  return cardValueSum;
+}
+
+export const displayCardSum = (cardArray: number[]) => {
+  let includesAce = false;
+  for (let i = 0; i < cardArray.length; i++) {
+    if (cardArray[i] % 13 == 0) {
+      includesAce = true;
+      break;
+    }
+  }
+  if (sumCardValues(cardArray) < 12 && includesAce) {
+    if (sumCardValues(cardArray) == 11 && cardArray.length == 2) return "czarny jacek";
+    return sumCardValues(cardArray) + " / " + (sumCardValues(cardArray) + 10);
+  }
+  return sumCardValues(cardArray);
+}
+
 const startRound = () => {
     tableCards = [[], []];
     
