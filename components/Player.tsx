@@ -1,10 +1,13 @@
 "use client";
 import { doubleAction, hitAction, standAction } from "@/lib/actions";
-import { translateCard, currPlayer } from "@/lib/GameLogic";
-import { use } from "react";
+import { translateCard } from "@/lib/GameLogic";
 
-export default function Player({ playerCards }: { playerCards: number[] }) {
-  const currentPlayer = use(currPlayer);
+interface PlayerProps {
+  playerCards: number[],
+  currPlayer: number,
+}
+
+export default function Player({ playerCards, currPlayer }: PlayerProps) {
   return (
     <>
       <div>
