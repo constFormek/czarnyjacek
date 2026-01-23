@@ -16,24 +16,21 @@ export default function Player({ playerCards }: { playerCards: number[] }) {
       { currPlayer == 0 && (
          <>
           <button onClick={async () => {
-            const hi1t = await hitAction();
-            console.log(hi1t);
+            await hitAction();
             }}>
               hit
           </button>
 
           <button onClick={async () => {
-            const hi1t = await doubleAction();
-            console.log(hi1t);
+            await doubleAction();
             }}>
-              hit
+              double
           </button>
 
           <button onClick={async () => {
-            const hi1t = await standAction();
-            console.log(hi1t);
+            await standAction();
             }}>
-              hit
+              stand
           </button>
          </>
       )}

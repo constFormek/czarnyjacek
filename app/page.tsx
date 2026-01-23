@@ -1,6 +1,6 @@
 import Player from "@/components/Player";
 import Dealer from "@/components/Dealer";
-import { initGame, tableCards } from "@/lib/GameLogic";
+import { tableCards } from "@/lib/GameLogic";
 
 export default function Home() {
   return (

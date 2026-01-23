@@ -75,12 +75,13 @@ export function hit() {
 
 export function stand() {
   currPlayer++;
+  console.log(currPlayer, "cipka");
 }
 
 
 export function double() {
-  dealCard(currPlayer);
-  currPlayer++;
+  hit();
+  stand();
 }
 
 
