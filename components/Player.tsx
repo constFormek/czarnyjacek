@@ -1,18 +1,14 @@
 "use client";
-
-import { useEffect, useState } from "react";
 import { hit } from '@/lib/actions'
+import { translateCard } from '@/lib/GameLogic';
 
 export default function Player({ playerCards }: { playerCards: number[] }) {
-  const [displayCards, setDisplayCards] = useState(playerCards);
-  useEffect(() => {
-    setDisplayCards(playerCards);
-  }, [playerCards])
   return (
     <>
       <div>
-        {displayCards.map((card, i) => (
-          <p key={i}>{card}</p>
+        <p>player:</p>
+        {playerCards.map((card, i) => (
+          <p key={i}>{translateCard(card)}</p>
         ))}
       </div>
       <button onClick={async () => {

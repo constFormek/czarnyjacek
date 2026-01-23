@@ -1,10 +1,16 @@
+"use client";
+import { hit } from '@/lib/actions'
+import { translateCard } from '@/lib/GameLogic';
 
-const Dealer = () => {
+export default function Dealer({ dealerCards }: { dealerCards: number[] }) {
   return (
-    <div>
-        tutaj wyświetluje (dobra wychodzisz!)
-    </div>
-  )
+    <>
+      <div>
+        <p>dealer:</p>
+        {dealerCards.map((card, i) => (
+          <p key={i}>{translateCard(card)}</p>
+        ))}
+      </div>
+    </>
+  );
 }
-
-export default Dealer

@@ -1,10 +1,12 @@
 import Player from "@/components/Player";
-import { Game } from "@/lib/Game";
-export const game = new Game
+import Dealer from "@/components/Dealer";
+import { initGame, tableCards } from "@/lib/GameLogic";
 
 export default function Home() {
-  game.initializeGame();
   return (
-    <Player playerCards={game.playerCards}></Player>
+    <>
+      <Player playerCards={tableCards[0]}></Player>
+      <Dealer dealerCards={tableCards[1]}></Dealer>
+    </>
   );
 }
