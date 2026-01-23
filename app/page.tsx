@@ -1,5 +1,6 @@
-import { game } from "@/contexts/GameContext";
-import Player from "./player";
+import Player from "@/components/Player";
+import { Game } from "@/lib/Game";
+export const game = new Game
 
 export default function Home() {
   game.initializeGame();

@@ -1,9 +1,9 @@
 "use server"
-import { game } from "@/contexts/GameContext";
+import { game } from "@/app/page";
 import { revalidatePath } from "next/cache";
 
 export async function hit(card: number) {
   "use server";
-  game.addCard(card);
+  game.dealCard();
   revalidatePath("/");
 }
