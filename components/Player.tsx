@@ -1,9 +1,10 @@
 "use client";
 import { doubleAction, hitAction, standAction } from "@/lib/actions";
 import { translateCard, currPlayer } from "@/lib/GameLogic";
+import { use } from "react";
 
 export default function Player({ playerCards }: { playerCards: number[] }) {
-
+  const currentPlayer = use(currPlayer);
   return (
     <>
       <div>

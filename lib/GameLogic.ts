@@ -1,4 +1,4 @@
-
+import { count } from "console";
 
 const gameShoe: number[] = [];
 const deckCount: number = 6;
@@ -8,7 +8,6 @@ let hiddenCard: number = 0;
 export let currPlayer = 0;
 
 export let tableCards: number[][] = [[], []]; // index -1 = dealer
-let playerDecisions: number[] = []
 
 export const initGame = () => {
     generateShoe();
@@ -66,7 +65,12 @@ const startRound = () => {
     }
 
     currPlayer = 0;
+}
 
+const continueToDealer = () => {
+  currPlayer++;
+  console.warn("dealer's turn");
+  tableCards[tableCards.length - 1].push(hiddenCard);
 }
 
 export function hit() {
@@ -74,16 +78,14 @@ export function hit() {
 }
 
 export function stand() {
+  if (currPlayer == tableCards.length - 2) return continueToDealer();
   currPlayer++;
-  console.log(currPlayer, "cipka");
+  console.log(currPlayer, "cipka")
 }
-
 
 export function double() {
   hit();
   stand();
 }
-
-
 
 initGame();
