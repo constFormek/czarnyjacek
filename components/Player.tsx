@@ -1,8 +1,9 @@
 "use client";
-import { hit } from '@/lib/actions'
-import { translateCard } from '@/lib/GameLogic';
+import { doubleAction, hitAction, standAction } from "@/lib/actions";
+import { translateCard, currPlayer } from "@/lib/GameLogic";
 
 export default function Player({ playerCards }: { playerCards: number[] }) {
+
   return (
     <>
       <div>
@@ -11,10 +12,31 @@ export default function Player({ playerCards }: { playerCards: number[] }) {
           <p key={i}>{translateCard(card)}</p>
         ))}
       </div>
-      <button onClick={async () => {
-        const repepe = await hit(2);
-        console.log(repepe)
-      }}>test</button>
+
+      { currPlayer == 0 && (
+         <>
+          <button onClick={async () => {
+            const hi1t = await hitAction();
+            console.log(hi1t);
+            }}>
+              hit
+          </button>
+
+          <button onClick={async () => {
+            const hi1t = await doubleAction();
+            console.log(hi1t);
+            }}>
+              hit
+          </button>
+
+          <button onClick={async () => {
+            const hi1t = await standAction();
+            console.log(hi1t);
+            }}>
+              hit
+          </button>
+         </>
+      )}
     </>
   );
 }

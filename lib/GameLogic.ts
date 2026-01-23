@@ -1,9 +1,11 @@
 
+
 const gameShoe: number[] = [];
 const deckCount: number = 6;
 let shoeCut: number = 0;
 
 let hiddenCard: number = 0;
+export let currPlayer = 0;
 
 export let tableCards: number[][] = [[], []]; // index -1 = dealer
 let playerDecisions: number[] = []
@@ -63,7 +65,24 @@ const startRound = () => {
         } 
     }
 
+    currPlayer = 0;
 
 }
+
+export function hit() {
+  dealCard(currPlayer);
+}
+
+export function stand() {
+  currPlayer++;
+}
+
+
+export function double() {
+  dealCard(currPlayer);
+  currPlayer++;
+}
+
+
 
 initGame();
