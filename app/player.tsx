@@ -1,20 +1,24 @@
 "use client";
 
-import { useEffect } from "react";
-import hit from './page'
+import { useEffect, useState } from "react";
+import { hit } from '@/lib/actions'
 
 export default function Player({ playerCards }: { playerCards: number[] }) {
+  const [displayCards, setDisplayCards] = useState(playerCards);
+  useEffect(() => {
+    setDisplayCards(playerCards);
+  }, [playerCards])
   return (
     <>
       <div>
-        {playerCards.map((card, i) => (
+        {displayCards.map((card, i) => (
           <p key={i}>{card}</p>
         ))}
       </div>
       <button onClick={async () => {
-        const repepe = await hit();
+        const repepe = await hit(2);
         console.log(repepe)
-      }}></button>
+      }}>test</button>
     </>
   );
 }
