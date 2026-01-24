@@ -1,6 +1,7 @@
 "use client";
-import { doubleAction, hitAction, standAction } from "@/lib/actions";
+import { doubleAction, getRoundFinished, hitAction, newRoundAction, standAction } from "@/lib/actions";
 import { translateCard, displayCardSum } from "@/lib/GameLogic";
+import { useState } from "react";
 
 interface PlayerProps {
   playerCards: number[],
@@ -8,6 +9,11 @@ interface PlayerProps {
 }
 
 export default function Player({ playerCards, currPlayer }: PlayerProps) {
+  const [roundFinished, setRoundFinished] = useState(false);
+  const checkRoundFinished = async () => {
+    const checkedValue = await getRoundFinished();
+    setRoundFinished(checkedValue);
+  }
   return (
     <>
       <div>
@@ -17,7 +23,7 @@ export default function Player({ playerCards, currPlayer }: PlayerProps) {
         ))}
       </div>
 
-      { currPlayer == 0 && (
+      { currPlayer == 0 && roundFinished == false && (
          <>
           <button onClick={async () => {
             await hitAction();
@@ -37,6 +43,13 @@ export default function Player({ playerCards, currPlayer }: PlayerProps) {
               stand
           </button>
          </>
+      )}
+      { roundFinished == true && (
+        <button onClick={async () => {
+          await newRoundAction();
+        }}>
+          new round
+        </button>
       )}
     </>
   );

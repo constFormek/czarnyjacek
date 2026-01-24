@@ -1,9 +1,12 @@
+import { refreshTable } from "./actions";
+
 const gameShoe: number[] = [];
 const deckCount: number = 6;
 let shoeCut: number = 0;
 
 let hiddenCard: number = 0;
-export let currPlayer = 0;
+export let currPlayer: number = 0;
+export let roundFinished: boolean = false;
 
 export let tableCards: number[][] = [[], []]; // index -1 = dealer
 
@@ -103,10 +106,12 @@ const includesAce = (cardArray: number[]) => {
   return includesAce;
 };
 
-const softCardSum = (cardArray: number[]) => {
+export const softCardSum = (cardArray: number[]) => {
   if (!includesAce(cardArray)) return sumCardValues(cardArray);
-  return sumCardValues(cardArray) + 10;
-}
+  const softSum = sumCardValues(cardArray) + 10;
+  if (softSum > 21) return sumCardValues(cardArray);
+  return softSum;
+};
 
 export const displayCardSum = (cardArray: number[]) => {
   if (sumCardValues(cardArray) < 12 && includesAce(cardArray)) {
@@ -117,8 +122,9 @@ export const displayCardSum = (cardArray: number[]) => {
   return sumCardValues(cardArray);
 };
 
-const startRound = () => {
+export const startRound = () => {
   tableCards = [[], []];
+  hiddenCard = 0;
 
   for (let i = 0; i < 2; i++) {
     for (let j = 0; j < tableCards.length; j++) {
@@ -129,25 +135,33 @@ const startRound = () => {
   currPlayer = 0;
 };
 
+const endRound = () => {
+  roundFinished = true;
+  if (tableCards[tableCards.length - 1].length == 1) {
+    tableCards[tableCards.length - 1].push(hiddenCard);
+  }
+}
+
 const nextDealerCard = () => {
   const dealerCards = tableCards[tableCards.length - 1];
   if (softCardSum(dealerCards) > 16) return;
 
-  setTimeout(() => {
-    hit();
-    nextDealerCard();
-  }, 1000);
+  dealCard(tableCards.length - 1);
+  nextDealerCard();
 };
 
 const continueToDealer = () => {
   currPlayer++;
-  console.warn("dealer's turn");
   tableCards[tableCards.length - 1].push(hiddenCard);
   nextDealerCard();
 };
 
 export function hit() {
   dealCard(currPlayer);
+
+  if (sumCardValues(tableCards[currPlayer]) > 21) {
+    endRound();
+  }
 }
 
 export function stand() {
