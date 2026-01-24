@@ -1,4 +1,4 @@
-import { count } from "console";
+import { Karla_Tamil_Inclined } from "next/font/google";
 
 const gameShoe: number[] = [];
 const deckCount: number = 6;
@@ -10,50 +10,70 @@ export let currPlayer = 0;
 export let tableCards: number[][] = [[], []]; // index -1 = dealer
 
 export const initGame = () => {
-    generateShoe();
-    startRound();
-}
+  generateShoe();
+  startRound();
+};
 
 const generateShoe = () => {
-    for (let i = 0; i < deckCount; i++) {
-      for (let j = 0; j < 52; j++) {
-        gameShoe.push(j);
-      }
+  for (let i = 0; i < deckCount; i++) {
+    for (let j = 0; j < 52; j++) {
+      gameShoe.push(j);
     }
-    shoeCut = Math.round(Math.random() * 100) + 100;
+  }
+  shoeCut = Math.round(Math.random() * 100) + 100;
 
-    shuffleShoe();
+  shuffleShoe();
 };
 
 const shuffleShoe = () => {
-    let currentIndex = gameShoe.length;
+  let currentIndex = gameShoe.length;
 
-    while (currentIndex != 0) {
-      const randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex--;
-      [gameShoe[currentIndex], gameShoe[randomIndex]] = [gameShoe[randomIndex], gameShoe[currentIndex]];
-    }
+  while (currentIndex != 0) {
+    const randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+    [gameShoe[currentIndex], gameShoe[randomIndex]] = [
+      gameShoe[randomIndex],
+      gameShoe[currentIndex],
+    ];
+  }
 };
 
 const dealCard = (number: number) => {
-    const card = gameShoe.pop();
-    if (!card) return;
+  const card = gameShoe.pop();
+  if (!card) return;
 
-    if (tableCards[tableCards.length - 1].length == 1 && number == tableCards.length - 1) {
-        hiddenCard = card;
-        return;
-    } 
-    tableCards[number].push(card);
+  if (
+    tableCards[tableCards.length - 1].length == 1 &&
+    number == tableCards.length - 1
+  ) {
+    hiddenCard = card;
     return;
-}
+  }
+  tableCards[number].push(card);
+  return;
+};
 
-const cardRanks = ["Ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King"];
+const cardRanks = [
+  "Ace",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "Jack",
+  "Queen",
+  "King",
+];
 const cardSuits = ["Spades", "Clubs", "Diamonds", "Hearts"];
 export const translateCard = (card: number) => {
-    const cardRank: number = card % 13;
-    const cardSuit: number = (card - cardRank) / 13;
-    return cardRanks[cardRank] + " of " + cardSuits[cardSuit];
-}
+  const cardRank: number = card % 13;
+  const cardSuit: number = (card - cardRank) / 13;
+  return cardRanks[cardRank] + " of " + cardSuits[cardSuit];
+};
 
 const sumCardValues = (cardArray: number[]) => {
   let cardValueSum: number = 0;
@@ -72,9 +92,9 @@ const sumCardValues = (cardArray: number[]) => {
   }
 
   return cardValueSum;
-}
+};
 
-export const displayCardSum = (cardArray: number[]) => {
+const includesAce = (cardArray: number[]) => {
   let includesAce = false;
   for (let i = 0; i < cardArray.length; i++) {
     if (cardArray[i] % 13 == 0) {
@@ -82,30 +102,51 @@ export const displayCardSum = (cardArray: number[]) => {
       break;
     }
   }
-  if (sumCardValues(cardArray) < 12 && includesAce) {
-    if (sumCardValues(cardArray) == 11 && cardArray.length == 2) return "czarny jacek";
-    return sumCardValues(cardArray) + " / " + (sumCardValues(cardArray) + 10);
+  return includesAce;
+};
+
+const softCardSum = (cardArray: number[]) => {
+  if (!includesAce(cardArray)) return sumCardValues(cardArray);
+  return sumCardValues(cardArray) + 10;
+}
+
+export const displayCardSum = (cardArray: number[]) => {
+  if (sumCardValues(cardArray) < 12 && includesAce(cardArray)) {
+    if (sumCardValues(cardArray) == 11 && cardArray.length == 2)
+      return "czarny jacek";
+    return sumCardValues(cardArray) + " / " + softCardSum(cardArray);
   }
   return sumCardValues(cardArray);
-}
+};
 
 const startRound = () => {
-    tableCards = [[], []];
-    
-    for (let i = 0; i < 2; i++) {
-        for (let j = 0; j < tableCards.length; j++) {
-            dealCard(j);
-        } 
-    }
+  tableCards = [[], []];
 
-    currPlayer = 0;
-}
+  for (let i = 0; i < 2; i++) {
+    for (let j = 0; j < tableCards.length; j++) {
+      dealCard(j);
+    }
+  }
+
+  currPlayer = 0;
+};
+
+const nextDealerCard = () => {
+  const dealerCards = tableCards[tableCards.length - 1];
+  if (softCardSum(dealerCards) > 16) return;
+  console.log("kupka");
+  setTimeout(() => {
+    dealCard(tableCards.length - 1);
+    nextDealerCard();
+  }, 1000);
+};
 
 const continueToDealer = () => {
   currPlayer++;
   console.warn("dealer's turn");
   tableCards[tableCards.length - 1].push(hiddenCard);
-}
+  nextDealerCard();
+};
 
 export function hit() {
   dealCard(currPlayer);
@@ -114,7 +155,7 @@ export function hit() {
 export function stand() {
   if (currPlayer == tableCards.length - 2) return continueToDealer();
   currPlayer++;
-  console.log(currPlayer, "cipka")
+  console.log(currPlayer, "cipka");
 }
 
 export function double() {
