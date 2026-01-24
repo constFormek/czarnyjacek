@@ -1,5 +1,3 @@
-import { Karla_Tamil_Inclined } from "next/font/google";
-
 const gameShoe: number[] = [];
 const deckCount: number = 6;
 let shoeCut: number = 0;
@@ -53,7 +51,7 @@ const dealCard = (number: number) => {
   return;
 };
 
-const cardRanks = [
+export const cardRanks = [
   "Ace",
   "2",
   "3",
@@ -68,7 +66,7 @@ const cardRanks = [
   "Queen",
   "King",
 ];
-const cardSuits = ["Spades", "Clubs", "Diamonds", "Hearts"];
+export const cardSuits = ["Spades", "Clubs", "Diamonds", "Hearts"];
 export const translateCard = (card: number) => {
   const cardRank: number = card % 13;
   const cardSuit: number = (card - cardRank) / 13;
@@ -134,9 +132,9 @@ const startRound = () => {
 const nextDealerCard = () => {
   const dealerCards = tableCards[tableCards.length - 1];
   if (softCardSum(dealerCards) > 16) return;
-  console.log("kupka");
+
   setTimeout(() => {
-    dealCard(tableCards.length - 1);
+    hit();
     nextDealerCard();
   }, 1000);
 };
