@@ -1,12 +1,23 @@
+import { gierkaProps, PlayerType } from "./types";
+
 const gameShoe: number[] = [];
 const deckCount: number = 6;
 let shoeCut: number = 0;
 
 let hiddenCard: number = 0;
-export let currPlayer: number = 0;
-export let roundFinished: boolean = false;
+let currPlayerIndex: number = 0;
+let roundFinished: boolean = false;
 
-export let tableCards: number[][] = [[], []]; // index -1 = dealer
+let dealerHand: number[] = [];
+
+const player: PlayerType = {
+  hands: [],
+  balance: 200,
+  isPlaying: false,
+  activeHandIndex: 0,
+}
+
+const playersArray: PlayerType[] = [player];
 
 export const initGame = () => {
   generateShoe();
@@ -37,19 +48,9 @@ const shuffleShoe = () => {
   }
 };
 
-const dealCard = (number: number) => {
+const dealCard = () => {
   const card = gameShoe.pop();
-  if (!card) return;
-
-  if (
-    tableCards[tableCards.length - 1].length == 1 &&
-    number == tableCards.length - 1
-  ) {
-    hiddenCard = card;
-    return;
-  }
-  tableCards[number].push(card);
-  return;
+  return card!;
 };
 
 export const cardRanks = [
@@ -121,17 +122,26 @@ export const displayCardSum = (cardArray: number[]) => {
 };
 
 export const startRound = () => {
+  dealerHand = [];
+  playersArray.forEach(player => {
+    player.hands = [];
+    player.isPlaying = true;
+  });
   roundFinished = false;
-  tableCards = [[], []];
   hiddenCard = 0;
 
   for (let i = 0; i < 2; i++) {
-    for (let j = 0; j < tableCards.length; j++) {
-      dealCard(j);
+    playersArray.forEach(player => {
+      player.hands[0].push(dealCard());
+    });
+    
+    if (i == 0) {
+      dealerHand.push(dealCard());
+    } else {
+      hiddenCard = dealCard();
     }
   }
 
-  currPlayer = 0;
 };
 
 const endRound = () => {
@@ -146,7 +156,7 @@ const nextDealerCard = () => {
   nextDealerCard();
 };
 
-const continueToDealer = () => {
+const dealersTurn = () => {
   currPlayer++;
   tableCards[tableCards.length - 1].push(hiddenCard);
 
@@ -176,17 +186,24 @@ export const handlePlayerAction = (action: string) => {
 };
 
 const hit = () => {
-  dealCard(currPlayer);
+  const currPlayer = playersArray[currPlayerIndex];
+  const currHand = currPlayer.hands[currPlayer.activeHandIndex];
 
-  if (sumCardValues(tableCards[currPlayer]) >= 21) {
+  currHand.push(dealCard());
+
+  if (sumCardValues(currHand) >= 21) {
     stand();
   }
 };
 
 const stand = () => {
-  if (currPlayer == tableCards.length - 2) return continueToDealer();
-  currPlayer++;
-  console.log(currPlayer, "cipka");
+  const currPlayer = playersArray[currPlayerIndex];
+  const isLastHand = currPlayer.activeHandIndex == currPlayer.hands.length -1;
+  const isLastPlayer = currPlayerIndex == playersArray.length -1;
+
+  if (isLastPlayer && isLastHand) return dealersTurn();
+  if (isLastHand) return currPlayerIndex++;
+  currPlayer.activeHandIndex++;
 };
 
 const double = () => {
@@ -194,4 +211,17 @@ const double = () => {
   stand();
 };
 
+const split = () => {
+
+}
+
 initGame();
+
+export const gierka: () => gierkaProps = () => {
+  return {
+    players: [player],
+    dealerHand: dealerHand,
+    shoeCut: 2,
+    cardsCount: 4,
+  }
+}
