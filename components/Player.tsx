@@ -31,17 +31,28 @@ export default function Player({
 
           <button
             onClick={async () => {
-              await playerAction("double");
-            }}>
-            double
-          </button>
-
-          <button
-            onClick={async () => {
               await playerAction("stand");
             }}>
             stand
           </button>
+
+          {playerObject.hands[playerObject.activeHandIndex].length == 2 && (
+            <>
+              <button
+                onClick={async () => {
+                  await playerAction("double");
+                }}>
+                double
+              </button>
+
+              <button
+                onClick={async () => {
+                  await playerAction("split");
+                }}>
+                split
+              </button>
+            </>
+          )}
         </>
       )}
       {roundFinished == true && (

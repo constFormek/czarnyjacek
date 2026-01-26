@@ -127,7 +127,7 @@ export const startRound = () => {
   roundFinished = false;
   currPlayerIndex = 0;
   playersArray.forEach(player => {
-    player.hands = [[], []];
+    player.hands = [[]];
     player.activeHandIndex = 0;
     player.isPlaying = true;
   });
@@ -135,9 +135,6 @@ export const startRound = () => {
   for (let i = 0; i < 2; i++) {
     playersArray.forEach(player => {
       player.hands[0].push(dealCard());
-    });
-    playersArray.forEach(player => {
-      player.hands[1].push(dealCard());
     });
     
     if (i == 0) {
@@ -221,9 +218,10 @@ const double = () => {
   const currHand = currPlayer.hands[currHandIndex];
 
   if (currHand.length > 2) return; // makeover later, instead of returning, never show the double button in the first place
-
+  console.log(currHandIndex, "przed");
   hit();
-  if (currPlayer.activeHandIndex == currHandIndex) stand();
+  console.log(currHandIndex, "po");
+  if (playersArray[currPlayerIndex].activeHandIndex == currHandIndex) stand();
 };
 
 const split = () => {
