@@ -215,13 +215,14 @@ const stand = () => {
 const double = () => {
   const currPlayer = playersArray[currPlayerIndex];
   const currHandIndex = currPlayer.activeHandIndex;
+  const currPlayerIndexCopy = currPlayerIndex;
   const currHand = currPlayer.hands[currHandIndex];
 
   if (currHand.length > 2) return; // makeover later, instead of returning, never show the double button in the first place
-  console.log(currHandIndex, "przed");
   hit();
-  console.log(currHandIndex, "po");
-  if (playersArray[currPlayerIndex].activeHandIndex == currHandIndex) stand();
+  if (currPlayerIndex != currPlayerIndexCopy) return;
+  if (playersArray[currPlayerIndex].activeHandIndex != currHandIndex) return;
+  stand();
 };
 
 const split = () => {
