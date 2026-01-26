@@ -1,27 +1,15 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { double, hit, roundFinished, stand, startRound } from "./GameLogic";
+import { handlePlayerAction, startRound } from "./GameLogic";
 
 export async function refreshTable() {
   revalidatePath("/");
 }
 
-export async function hitAction() {
+export async function playerAction(action: string) {
   "use server";
-  hit();
-  refreshTable();
-}
-
-export async function standAction() {
-  "use server";
-  stand();
-  refreshTable();
-}
-
-export async function doubleAction() {
-  "use server";
-  double();
+  handlePlayerAction(action);
   refreshTable();
 }
 
@@ -29,8 +17,4 @@ export async function newRoundAction() {
   "use server";
   startRound();
   refreshTable();
-}
-
-export async function getRoundFinished() {
-  return roundFinished;
 }

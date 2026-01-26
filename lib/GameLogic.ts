@@ -1,5 +1,3 @@
-import { refreshTable } from "./actions";
-
 const gameShoe: number[] = [];
 const deckCount: number = 6;
 let shoeCut: number = 0;
@@ -123,6 +121,7 @@ export const displayCardSum = (cardArray: number[]) => {
 };
 
 export const startRound = () => {
+  roundFinished = false;
   tableCards = [[], []];
   hiddenCard = 0;
 
@@ -137,14 +136,11 @@ export const startRound = () => {
 
 const endRound = () => {
   roundFinished = true;
-  if (tableCards[tableCards.length - 1].length == 1) {
-    tableCards[tableCards.length - 1].push(hiddenCard);
-  }
-}
+};
 
 const nextDealerCard = () => {
   const dealerCards = tableCards[tableCards.length - 1];
-  if (softCardSum(dealerCards) > 16) return;
+  if (softCardSum(dealerCards) > 16) return endRound();
 
   dealCard(tableCards.length - 1);
   nextDealerCard();
@@ -153,26 +149,49 @@ const nextDealerCard = () => {
 const continueToDealer = () => {
   currPlayer++;
   tableCards[tableCards.length - 1].push(hiddenCard);
+
+  // sprawdzenie czy ktos jeszcze gra (czy ktos nie zbustował)
+  for (let j = 0; j < tableCards.length - 1; j++) {
+    if (sumCardValues(tableCards[j]) > 21) return endRound();
+  }
+
   nextDealerCard();
 };
 
-export function hit() {
+export const handlePlayerAction = (action: string) => {
+  switch (action) {
+    case "hit":
+      hit();
+      break;
+    case "double":
+      double();
+      break;
+    case "stand":
+      stand();
+      break;
+    default:
+      console.error("jablecznik");
+      break;
+  }
+};
+
+const hit = () => {
   dealCard(currPlayer);
 
-  if (sumCardValues(tableCards[currPlayer]) > 21) {
-    endRound();
+  if (sumCardValues(tableCards[currPlayer]) >= 21) {
+    stand();
   }
-}
+};
 
-export function stand() {
+const stand = () => {
   if (currPlayer == tableCards.length - 2) return continueToDealer();
   currPlayer++;
   console.log(currPlayer, "cipka");
-}
+};
 
-export function double() {
+const double = () => {
   hit();
   stand();
-}
+};
 
 initGame();
