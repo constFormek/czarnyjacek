@@ -1,48 +1,54 @@
 "use client";
 import { newRoundAction, playerAction } from "@/lib/actions";
-import { translateCard, displayCardSum } from "@/lib/GameLogic";
+import { PlayerType } from "@/lib/types";
+import Hand from "./Hand";
 
 interface PlayerProps {
-  playerCards: number[],
-  currPlayer: number,
-  roundFinished: boolean,
+  playerObject: PlayerType;
+  currPlayer: number;
+  roundFinished: boolean;
 }
 
-export default function Player({ playerCards, currPlayer, roundFinished }: PlayerProps) {
+export default function Player({
+  playerObject,
+  currPlayer,
+  roundFinished,
+}: PlayerProps) {
+  const playerHands = playerObject.hands
   return (
     <>
-      <div>
-        <p>player: {displayCardSum(playerCards)}</p>
-        {playerCards.map((card, i) => (
-          <p key={i}>{translateCard(card)}</p>
-        ))}
-      </div>
-
-      { currPlayer == 0 && roundFinished == false && (
-         <>
-          <button onClick={async () => {
-            await playerAction("hit");
+      {playerHands.map((hand, i) => (
+        <Hand key={i} handID={i} handCards={hand} currHandIndex={playerObject.activeHandIndex} />
+      ))}
+      {currPlayer == 0 && roundFinished == false && (
+        <>
+          <button
+            onClick={async () => {
+              await playerAction("hit");
             }}>
-              hit
+            hit
           </button>
 
-          <button onClick={async () => {
-            await playerAction("double");
+          <button
+            onClick={async () => {
+              await playerAction("double");
             }}>
-              double
+            double
           </button>
 
-          <button onClick={async () => {
-            await playerAction("stand");
+          <button
+            onClick={async () => {
+              await playerAction("stand");
             }}>
-              stand
+            stand
           </button>
-         </>
+        </>
       )}
-      { roundFinished == true && (
-        <button onClick={async () => {
-          await newRoundAction();
-        }}>
+      {roundFinished == true && (
+        <button
+          onClick={async () => {
+            await newRoundAction();
+          }}>
           new round
         </button>
       )}

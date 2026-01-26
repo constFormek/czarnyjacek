@@ -1,13 +1,14 @@
 import Player from "@/components/Player";
 import Dealer from "@/components/Dealer";
-import { currPlayer, tableCards, roundFinished } from "@/lib/GameLogic";
+import { returnGameInfo } from "@/lib/GameLogic";
 
 export default function Home() {
+  const gameInfo = returnGameInfo();
   return (
     <>
-      <Dealer dealerCards={tableCards[1]}></Dealer>
+      <Dealer dealerCards={gameInfo.dealerHand}></Dealer>
       <hr />
-      <Player currPlayer={currPlayer} playerCards={tableCards[0]} roundFinished={roundFinished}></Player>
+      <Player currPlayer={gameInfo.currPlayerIndex} playerObject={gameInfo.players[0]} roundFinished={gameInfo.roundFinished}></Player>
     </>
   );
 }

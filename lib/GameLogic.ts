@@ -1,4 +1,4 @@
-import { gierkaProps, PlayerType } from "./types";
+import { gameInfoProps, PlayerType } from "./types";
 
 const gameShoe: number[] = [];
 const deckCount: number = 6;
@@ -19,7 +19,7 @@ const player: PlayerType = {
 
 const playersArray: PlayerType[] = [player];
 
-export const initGame = () => {
+const initGame = () => {
   generateShoe();
   startRound();
 };
@@ -123,16 +123,21 @@ export const displayCardSum = (cardArray: number[]) => {
 
 export const startRound = () => {
   dealerHand = [];
+  hiddenCard = 0;
+  roundFinished = false;
+  currPlayerIndex = 0;
   playersArray.forEach(player => {
-    player.hands = [];
+    player.hands = [[], []];
+    player.activeHandIndex = 0;
     player.isPlaying = true;
   });
-  roundFinished = false;
-  hiddenCard = 0;
 
   for (let i = 0; i < 2; i++) {
     playersArray.forEach(player => {
       player.hands[0].push(dealCard());
+    });
+    playersArray.forEach(player => {
+      player.hands[1].push(dealCard());
     });
     
     if (i == 0) {
@@ -149,20 +154,24 @@ const endRound = () => {
 };
 
 const nextDealerCard = () => {
-  const dealerCards = tableCards[tableCards.length - 1];
-  if (softCardSum(dealerCards) > 16) return endRound();
+  if (softCardSum(dealerHand) > 16) return endRound();
 
-  dealCard(tableCards.length - 1);
+  dealerHand.push(dealCard());
+
   nextDealerCard();
 };
 
 const dealersTurn = () => {
-  currPlayer++;
-  tableCards[tableCards.length - 1].push(hiddenCard);
+  currPlayerIndex++;
+  dealerHand.push(hiddenCard);
 
   // sprawdzenie czy ktos jeszcze gra (czy ktos nie zbustował)
-  for (let j = 0; j < tableCards.length - 1; j++) {
-    if (sumCardValues(tableCards[j]) > 21) return endRound();
+  for (let i = 0; i < playersArray.length - 1; i++) {
+    const currPlayerHands = playersArray[i].hands;
+    for (let j = 0; j < currPlayerHands.length; j++) {
+      const currHand = currPlayerHands[j];
+      if (sumCardValues(currHand) > 21) return endRound();
+    }
   }
 
   nextDealerCard();
@@ -207,8 +216,14 @@ const stand = () => {
 };
 
 const double = () => {
+  const currPlayer = playersArray[currPlayerIndex];
+  const currHandIndex = currPlayer.activeHandIndex;
+  const currHand = currPlayer.hands[currHandIndex];
+
+  if (currHand.length > 2) return; // makeover later, instead of returning, never show the double button in the first place
+
   hit();
-  stand();
+  if (currPlayer.activeHandIndex == currHandIndex) stand();
 };
 
 const split = () => {
@@ -217,11 +232,13 @@ const split = () => {
 
 initGame();
 
-export const gierka: () => gierkaProps = () => {
+export const returnGameInfo: () => gameInfoProps = () => {
   return {
     players: [player],
     dealerHand: dealerHand,
-    shoeCut: 2,
-    cardsCount: 4,
+    shoeCut: shoeCut,
+    cardsCount: gameShoe.length,
+    currPlayerIndex: currPlayerIndex,
+    roundFinished: roundFinished,
   }
 }
