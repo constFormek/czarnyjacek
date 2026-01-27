@@ -2,6 +2,7 @@
 import { newRoundAction, playerAction } from "@/lib/actions";
 import { PlayerType } from "@/lib/types";
 import Hand from "./Hand";
+import { checkForSameCardValue } from "@/lib/GameLogic";
 
 interface PlayerProps {
   playerObject: PlayerType;
@@ -14,11 +15,17 @@ export default function Player({
   currPlayer,
   roundFinished,
 }: PlayerProps) {
-  const playerHands = playerObject.hands
+  const playerHands = playerObject.hands;
+  const activeHand = playerHands[playerObject.activeHandIndex];
   return (
     <>
       {playerHands.map((hand, i) => (
-        <Hand key={i} handID={i} handCards={hand} currHandIndex={playerObject.activeHandIndex} />
+        <Hand
+          key={i}
+          handID={i}
+          handCards={hand}
+          currHandIndex={playerObject.activeHandIndex}
+        />
       ))}
       {currPlayer == 0 && roundFinished == false && (
         <>
@@ -44,13 +51,14 @@ export default function Player({
                 }}>
                 double
               </button>
-
-              <button
-                onClick={async () => {
-                  await playerAction("split");
-                }}>
-                split
-              </button>
+              {checkForSameCardValue(activeHand) && (
+                <button
+                  onClick={async () => {
+                    await playerAction("split");
+                  }}>
+                  split
+                </button>
+              )}
             </>
           )}
         </>

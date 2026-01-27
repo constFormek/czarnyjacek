@@ -1,6 +1,6 @@
 import { gameInfoProps, PlayerType } from "./types";
 
-const gameShoe: number[] = [];
+let gameShoe: number[] = [];
 const deckCount: number = 6;
 let shoeCut: number = 0;
 
@@ -25,6 +25,7 @@ const initGame = () => {
 };
 
 const generateShoe = () => {
+  gameShoe = new Array();
   for (let i = 0; i < deckCount; i++) {
     for (let j = 0; j < 52; j++) {
       gameShoe.push(j);
@@ -122,6 +123,8 @@ export const displayCardSum = (cardArray: number[]) => {
 };
 
 export const startRound = () => {
+  if (deckCount * 52 - gameShoe.length <= shoeCut) generateShoe();
+
   dealerHand = [];
   hiddenCard = 0;
   roundFinished = false;
@@ -185,6 +188,8 @@ export const handlePlayerAction = (action: string) => {
     case "stand":
       stand();
       break;
+    case "split":
+      split();
     default:
       console.error("jablecznik");
       break;
@@ -210,6 +215,9 @@ const stand = () => {
   if (isLastPlayer && isLastHand) return dealersTurn();
   if (isLastHand) return currPlayerIndex++;
   currPlayer.activeHandIndex++;
+
+  const newHand = currPlayer.hands[currPlayer.activeHandIndex];
+  if (newHand.length < 2) hit();
 };
 
 const double = () => {
@@ -218,15 +226,35 @@ const double = () => {
   const currPlayerIndexCopy = currPlayerIndex;
   const currHand = currPlayer.hands[currHandIndex];
 
-  if (currHand.length > 2) return; // makeover later, instead of returning, never show the double button in the first place
+  if (currHand.length != 2) return;
   hit();
   if (currPlayerIndex != currPlayerIndexCopy) return;
   if (playersArray[currPlayerIndex].activeHandIndex != currHandIndex) return;
   stand();
 };
 
-const split = () => {
+export const checkForSameCardValue = (cardArray: number[]) => { // name of this function is subject to change
+  if (cardArray.length != 2) return false;
+  const firstCardValue: number = sumCardValues([cardArray[0]]); // creates an array with only one card then sums it's values
+  const secondCardValue: number = sumCardValues([cardArray[1]]);
+  if (firstCardValue == secondCardValue) return true;
+}
 
+const split = () => {
+  const currPlayer = playersArray[currPlayerIndex];
+  const currHand = currPlayer.hands[currPlayer.activeHandIndex];
+
+  if (currHand.length != 2) return;
+  if (!checkForSameCardValue(currHand)) return;
+
+  currPlayer.hands.push(new Array());
+  const nextHand = currPlayer.hands[currPlayer.hands.length - 1];
+
+  const secondCardInHand = currHand.pop();
+  if (!secondCardInHand) return;
+
+  nextHand.push(secondCardInHand);
+  hit();
 }
 
 initGame();
