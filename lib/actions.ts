@@ -12,10 +12,6 @@ export async function playerAction(userToken: string, action: string) {
   refreshTable();
 }
 
-export async function newRoundAction() {
-  refreshTable();
-}
-
 export async function getGameInfoAction(userToken: string) {
   return getGameInfo(userToken);
 }

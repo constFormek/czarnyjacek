@@ -60,7 +60,6 @@ class Game {
     this.dealerHand = [];
     this.hiddenCard = 0;
     this.roundFinished = false;
-    this.currentPlayerIndex = 0;
     this.playersArray.forEach((player) => {
       player.hands = [[]];
       player.activeHandIndex = 0;
@@ -68,8 +67,9 @@ class Game {
     });
 
     for (let i = 0; i < 2; i++) {
-      this.playersArray.forEach((player) => {
-        player.hands[0].push(this.takeCard());
+      this.playersArray.forEach((player, j) => {
+        this.currentPlayerIndex = j;
+        this.hit();
       });
 
       if (i == 0) {
@@ -78,6 +78,11 @@ class Game {
         this.hiddenCard = this.takeCard();
       }
     }
+
+    this.currentPlayerIndex = 0;
+
+    if (softCardSum([this.dealerHand[0], this.hiddenCard]) == 21)
+      this.dealersTurn();
   };
 
   endRound = () => {
@@ -109,7 +114,7 @@ class Game {
 
     currentHand.push(this.takeCard());
 
-    if (sumCardValues(currentHand) >= 21) {
+    if (softCardSum(currentHand) >= 21) {
       this.stand();
     }
   };
@@ -150,6 +155,7 @@ class Game {
     const currentPlayer = this.playersArray[this.currentPlayerIndex];
     const currentHand = currentPlayer.hands[currentPlayer.activeHandIndex];
 
+    if (currentPlayer.hands.length >= 4) return;
     if (currentHand.length != 2) return;
     if (!checkForSameCardValue(currentHand)) return;
 
@@ -175,13 +181,16 @@ class Game {
   };
 }
 
-export const ongoingGames = new Map<string, Game>();
+const ongoingGames = new Map<string, Game>();
 
 export const createGameObject = (userToken: string) => {
   if (!ongoingGames.get(userToken)) {
     ongoingGames.set(userToken, new Game());
   }
-  return ongoingGames.get(userToken);
+};
+
+export const getOngoingGames = () => {
+  return ongoingGames;
 };
 
 export const cardRanks = [
@@ -277,6 +286,9 @@ export const handlePlayerAction = (userToken: string, action: string) => {
     case "split":
       gameObject.split();
       break;
+    case "newRound":
+      gameObject.startRound();
+      break;
     default:
       console.error("wrong action!");
       break;
@@ -292,4 +304,13 @@ export const getGameInfo: (userToken: string) => gameInfoProps = (
     return newGame.getGameInfo();
   }
   return gameObject.getGameInfo();
+};
+
+export const startNewRound = (userToken: string) => {
+  const gameObject = ongoingGames.get(userToken);
+
+  if (!gameObject) {
+    return;
+  }
+  gameObject.startRound();
 };

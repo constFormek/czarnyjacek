@@ -1,19 +1,21 @@
 "use client";
-import { getGameInfoAction, newRoundAction, playerAction } from "@/lib/actions";
 import { gameInfoProps, PlayerType } from "@/lib/types";
 import Hand from "./Hand";
 import { checkForSameCardValue } from "@/lib/GameLogic";
-import { useEffect, useState } from "react";
 
-export default function Player({ userToken }: { userToken: string }) {
-  const [playerObject, setPlayerObject] = useState({});
-  async () => {
-    const gameInfo = await getGameInfoAction(userToken);
-    setPlayerObject(gameInfo.players[0])
-  };
+export default function Player({
+  gameInfo,
+  actionFunction,
+}: {
+  gameInfo: gameInfoProps | null;
+  actionFunction: Function;
+}) {
+  if (gameInfo == null) {
+    return <div>loading...</div>;
+  }
+  const playerObject: PlayerType = gameInfo.players[0];
   const playerHands = playerObject.hands;
   const activeHand = playerHands[playerObject.activeHandIndex];
-  useEffect(() => {}, []);
   return (
     <>
       {playerHands.map((hand, i) => (
@@ -28,32 +30,36 @@ export default function Player({ userToken }: { userToken: string }) {
         <>
           <button
             onClick={async () => {
-              await playerAction(userToken, "hit");
+              await actionFunction("hit");
             }}>
             hit
           </button>
 
           <button
             onClick={async () => {
-              await playerAction(userToken, "stand");
+              await actionFunction("stand");
             }}>
             stand
           </button>
 
-          {playerObject.hands[playerObject.activeHandIndex].length == 2 && (
+          {playerHands[playerObject.activeHandIndex].length == 2 && (
             <>
               <button
                 onClick={async () => {
-                  await playerAction(userToken, "double");
+                  await actionFunction("double");
                 }}>
                 double
               </button>
               {checkForSameCardValue(activeHand) && (
                 <button
+                  disabled={playerHands.length >= 4}
+                  className={`${playerHands.length >= 4 ? "opacity-40 cursor-not-allowed!" : null}`}
                   onClick={async () => {
-                    await playerAction(userToken, "split");
+                    await actionFunction("split");
                   }}>
-                  split
+                  {playerHands.length >= 4
+                    ? "can't split (4 hands max)"
+                    : "split"}
                 </button>
               )}
             </>
@@ -63,7 +69,7 @@ export default function Player({ userToken }: { userToken: string }) {
       {gameInfo.roundFinished == true && (
         <button
           onClick={async () => {
-            await newRoundAction();
+            await actionFunction("newRound");
           }}>
           new round
         </button>
