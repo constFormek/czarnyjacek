@@ -1,57 +1,187 @@
 import { gameInfoProps, PlayerType } from "./types";
 
-let gameShoe: number[] = [];
-const deckCount: number = 6;
-let shoeCut: number = 0;
+class Game {
+  private gameShoe: number[] = new Array();
+  private deckCount: number = 6;
+  private shoeCut: number = 0;
+  private roundFinished: boolean = true;
 
-let hiddenCard: number = 0;
-let currPlayerIndex: number = 0;
-let roundFinished: boolean = false;
+  private dealerHand: number[] = new Array();
+  private hiddenCard: number = 0;
 
-let dealerHand: number[] = [];
+  private player: PlayerType = {
+    hands: [],
+    balance: 200,
+    isPlaying: false,
+    activeHandIndex: 0,
+  };
+  private playersArray: PlayerType[] = new Array(this.player);
+  private currentPlayerIndex: number = 0;
 
-const player: PlayerType = {
-  hands: [],
-  balance: 200,
-  isPlaying: false,
-  activeHandIndex: 0,
+  constructor() {
+    this.generateShoe();
+  }
+
+  private generateShoe = () => {
+    this.gameShoe = new Array();
+    for (let i = 0; i < this.deckCount; i++) {
+      for (let j = 0; j < 52; j++) {
+        this.gameShoe.push(j);
+      }
+    }
+    this.shoeCut = Math.round(Math.random() * 100) + 100;
+
+    this.shuffleShoe();
+  };
+
+  private shuffleShoe = () => {
+    let currentIndex = this.gameShoe.length;
+
+    while (currentIndex != 0) {
+      const randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+      [this.gameShoe[currentIndex], this.gameShoe[randomIndex]] = [
+        this.gameShoe[randomIndex],
+        this.gameShoe[currentIndex],
+      ];
+    }
+  };
+
+  takeCard = () => {
+    // changed name because it didn't actually "deal" the card
+    const card = this.gameShoe.pop();
+    return card!;
+  };
+
+  startRound = () => {
+    if (this.deckCount * 52 - this.gameShoe.length <= this.shoeCut)
+      this.generateShoe();
+
+    this.dealerHand = [];
+    this.hiddenCard = 0;
+    this.roundFinished = false;
+    this.currentPlayerIndex = 0;
+    this.playersArray.forEach((player) => {
+      player.hands = [[]];
+      player.activeHandIndex = 0;
+      player.isPlaying = true;
+    });
+
+    for (let i = 0; i < 2; i++) {
+      this.playersArray.forEach((player) => {
+        player.hands[0].push(this.takeCard());
+      });
+
+      if (i == 0) {
+        this.dealerHand.push(this.takeCard());
+      } else {
+        this.hiddenCard = this.takeCard();
+      }
+    }
+  };
+
+  endRound = () => {
+    this.roundFinished = true;
+  };
+
+  dealersTurn = () => {
+    this.currentPlayerIndex++;
+    this.dealerHand.push(this.hiddenCard);
+
+    // sprawdzenie czy ktos jeszcze gra (czy ktos nie zbustował)
+    for (let i = 0; i < this.playersArray.length - 1; i++) {
+      const currentPlayerHands = this.playersArray[i].hands;
+      for (let j = 0; j < currentPlayerHands.length; j++) {
+        const currentHand = currentPlayerHands[j];
+        if (sumCardValues(currentHand) > 21) return this.endRound();
+      }
+    }
+
+    while (softCardSum(this.dealerHand) <= 16) {
+      this.dealerHand.push(this.takeCard());
+    }
+    this.endRound();
+  };
+
+  hit = () => {
+    const currentPlayer = this.playersArray[this.currentPlayerIndex];
+    const currentHand = currentPlayer.hands[currentPlayer.activeHandIndex];
+
+    currentHand.push(this.takeCard());
+
+    if (sumCardValues(currentHand) >= 21) {
+      this.stand();
+    }
+  };
+
+  stand = () => {
+    const currentPlayer = this.playersArray[this.currentPlayerIndex];
+    const isLastHand =
+      currentPlayer.activeHandIndex == currentPlayer.hands.length - 1;
+    const isLastPlayer =
+      this.currentPlayerIndex == this.playersArray.length - 1;
+
+    if (isLastPlayer && isLastHand) return this.dealersTurn();
+    if (isLastHand) return this.currentPlayerIndex++;
+    currentPlayer.activeHandIndex++;
+
+    const newHand = currentPlayer.hands[currentPlayer.activeHandIndex];
+    if (newHand.length < 2) this.hit();
+  };
+
+  double = () => {
+    const currentPlayer = this.playersArray[this.currentPlayerIndex];
+    const currentHandIndex = currentPlayer.activeHandIndex;
+    const currentPlayerIndexCopy = this.currentPlayerIndex;
+    const currentHand = currentPlayer.hands[currentHandIndex];
+
+    if (currentHand.length != 2) return;
+    this.hit();
+    if (this.currentPlayerIndex != currentPlayerIndexCopy) return;
+    if (
+      this.playersArray[this.currentPlayerIndex].activeHandIndex !=
+      currentHandIndex
+    )
+      return;
+    this.stand();
+  };
+
+  split = () => {
+    const currentPlayer = this.playersArray[this.currentPlayerIndex];
+    const currentHand = currentPlayer.hands[currentPlayer.activeHandIndex];
+
+    if (currentHand.length != 2) return;
+    if (!checkForSameCardValue(currentHand)) return;
+
+    currentPlayer.hands.push(new Array());
+    const nextHand = currentPlayer.hands[currentPlayer.hands.length - 1];
+
+    const secondCardInHand = currentHand.pop();
+    if (!secondCardInHand) return;
+
+    nextHand.push(secondCardInHand);
+    this.hit();
+  };
+
+  getGameInfo: () => gameInfoProps = () => {
+    return {
+      players: this.playersArray,
+      dealerHand: this.dealerHand,
+      shoeCut: this.shoeCut,
+      cardsLeft: this.gameShoe.length,
+      currentPlayerIndex: this.currentPlayerIndex,
+      roundFinished: this.roundFinished,
+    };
+  };
 }
 
-const playersArray: PlayerType[] = [player];
+export const ongoingGames = new Map<string, Game>();
 
-const initGame = () => {
-  generateShoe();
-  startRound();
-};
-
-const generateShoe = () => {
-  gameShoe = new Array();
-  for (let i = 0; i < deckCount; i++) {
-    for (let j = 0; j < 52; j++) {
-      gameShoe.push(j);
-    }
+export const createGameObject = (userToken: string) => {
+  if (!ongoingGames.get(userToken)) {
+    ongoingGames.set(userToken, new Game());
   }
-  shoeCut = Math.round(Math.random() * 100) + 100;
-
-  shuffleShoe();
-};
-
-const shuffleShoe = () => {
-  let currentIndex = gameShoe.length;
-
-  while (currentIndex != 0) {
-    const randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex--;
-    [gameShoe[currentIndex], gameShoe[randomIndex]] = [
-      gameShoe[randomIndex],
-      gameShoe[currentIndex],
-    ];
-  }
-};
-
-const dealCard = () => {
-  const card = gameShoe.pop();
-  return card!;
+  return ongoingGames.get(userToken);
 };
 
 export const cardRanks = [
@@ -106,6 +236,14 @@ const includesAce = (cardArray: number[]) => {
   return includesAce;
 };
 
+export const checkForSameCardValue = (cardArray: number[]) => {
+  // name of this function is subject to change
+  if (cardArray.length != 2) return false;
+  const firstCardValue: number = sumCardValues([cardArray[0]]); // creates an array with only one card then sums it's values
+  const secondCardValue: number = sumCardValues([cardArray[1]]);
+  if (firstCardValue == secondCardValue) return true;
+};
+
 export const softCardSum = (cardArray: number[]) => {
   if (!includesAce(cardArray)) return sumCardValues(cardArray);
   const softSum = sumCardValues(cardArray) + 10;
@@ -122,150 +260,36 @@ export const displayCardSum = (cardArray: number[]) => {
   return sumCardValues(cardArray);
 };
 
-export const startRound = () => {
-  if (deckCount * 52 - gameShoe.length <= shoeCut) generateShoe();
+export const handlePlayerAction = (userToken: string, action: string) => {
+  const gameObject = ongoingGames.get(userToken);
+  if (!gameObject) return;
 
-  dealerHand = [];
-  hiddenCard = 0;
-  roundFinished = false;
-  currPlayerIndex = 0;
-  playersArray.forEach(player => {
-    player.hands = [[]];
-    player.activeHandIndex = 0;
-    player.isPlaying = true;
-  });
-
-  for (let i = 0; i < 2; i++) {
-    playersArray.forEach(player => {
-      player.hands[0].push(dealCard());
-    });
-    
-    if (i == 0) {
-      dealerHand.push(dealCard());
-    } else {
-      hiddenCard = dealCard();
-    }
-  }
-
-};
-
-const endRound = () => {
-  roundFinished = true;
-};
-
-const nextDealerCard = () => {
-  if (softCardSum(dealerHand) > 16) return endRound();
-
-  dealerHand.push(dealCard());
-
-  nextDealerCard();
-};
-
-const dealersTurn = () => {
-  currPlayerIndex++;
-  dealerHand.push(hiddenCard);
-
-  // sprawdzenie czy ktos jeszcze gra (czy ktos nie zbustował)
-  for (let i = 0; i < playersArray.length - 1; i++) {
-    const currPlayerHands = playersArray[i].hands;
-    for (let j = 0; j < currPlayerHands.length; j++) {
-      const currHand = currPlayerHands[j];
-      if (sumCardValues(currHand) > 21) return endRound();
-    }
-  }
-
-  nextDealerCard();
-};
-
-export const handlePlayerAction = (action: string) => {
   switch (action) {
     case "hit":
-      hit();
+      gameObject.hit();
       break;
     case "double":
-      double();
+      gameObject.double();
       break;
     case "stand":
-      stand();
+      gameObject.stand();
       break;
     case "split":
-      split();
+      gameObject.split();
+      break;
     default:
-      console.error("jablecznik");
+      console.error("wrong action!");
       break;
   }
 };
 
-const hit = () => {
-  const currPlayer = playersArray[currPlayerIndex];
-  const currHand = currPlayer.hands[currPlayer.activeHandIndex];
-
-  currHand.push(dealCard());
-
-  if (sumCardValues(currHand) >= 21) {
-    stand();
+export const getGameInfo: (userToken: string) => gameInfoProps = (
+  userToken: string,
+) => {
+  const gameObject = ongoingGames.get(userToken);
+  if (!gameObject) {
+    const newGame = new Game();
+    return newGame.getGameInfo();
   }
+  return gameObject.getGameInfo();
 };
-
-const stand = () => {
-  const currPlayer = playersArray[currPlayerIndex];
-  const isLastHand = currPlayer.activeHandIndex == currPlayer.hands.length -1;
-  const isLastPlayer = currPlayerIndex == playersArray.length -1;
-
-  if (isLastPlayer && isLastHand) return dealersTurn();
-  if (isLastHand) return currPlayerIndex++;
-  currPlayer.activeHandIndex++;
-
-  const newHand = currPlayer.hands[currPlayer.activeHandIndex];
-  if (newHand.length < 2) hit();
-};
-
-const double = () => {
-  const currPlayer = playersArray[currPlayerIndex];
-  const currHandIndex = currPlayer.activeHandIndex;
-  const currPlayerIndexCopy = currPlayerIndex;
-  const currHand = currPlayer.hands[currHandIndex];
-
-  if (currHand.length != 2) return;
-  hit();
-  if (currPlayerIndex != currPlayerIndexCopy) return;
-  if (playersArray[currPlayerIndex].activeHandIndex != currHandIndex) return;
-  stand();
-};
-
-export const checkForSameCardValue = (cardArray: number[]) => { // name of this function is subject to change
-  if (cardArray.length != 2) return false;
-  const firstCardValue: number = sumCardValues([cardArray[0]]); // creates an array with only one card then sums it's values
-  const secondCardValue: number = sumCardValues([cardArray[1]]);
-  if (firstCardValue == secondCardValue) return true;
-}
-
-const split = () => {
-  const currPlayer = playersArray[currPlayerIndex];
-  const currHand = currPlayer.hands[currPlayer.activeHandIndex];
-
-  if (currHand.length != 2) return;
-  if (!checkForSameCardValue(currHand)) return;
-
-  currPlayer.hands.push(new Array());
-  const nextHand = currPlayer.hands[currPlayer.hands.length - 1];
-
-  const secondCardInHand = currHand.pop();
-  if (!secondCardInHand) return;
-
-  nextHand.push(secondCardInHand);
-  hit();
-}
-
-initGame();
-
-export const returnGameInfo: () => gameInfoProps = () => {
-  return {
-    players: [player],
-    dealerHand: dealerHand,
-    shoeCut: shoeCut,
-    cardsCount: gameShoe.length,
-    currPlayerIndex: currPlayerIndex,
-    roundFinished: roundFinished,
-  }
-}

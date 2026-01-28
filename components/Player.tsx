@@ -1,22 +1,19 @@
 "use client";
-import { newRoundAction, playerAction } from "@/lib/actions";
-import { PlayerType } from "@/lib/types";
+import { getGameInfoAction, newRoundAction, playerAction } from "@/lib/actions";
+import { gameInfoProps, PlayerType } from "@/lib/types";
 import Hand from "./Hand";
 import { checkForSameCardValue } from "@/lib/GameLogic";
+import { useEffect, useState } from "react";
 
-interface PlayerProps {
-  playerObject: PlayerType;
-  currPlayer: number;
-  roundFinished: boolean;
-}
-
-export default function Player({
-  playerObject,
-  currPlayer,
-  roundFinished,
-}: PlayerProps) {
+export default function Player({ userToken }: { userToken: string }) {
+  const [playerObject, setPlayerObject] = useState({});
+  async () => {
+    const gameInfo = await getGameInfoAction(userToken);
+    setPlayerObject(gameInfo.players[0])
+  };
   const playerHands = playerObject.hands;
   const activeHand = playerHands[playerObject.activeHandIndex];
+  useEffect(() => {}, []);
   return (
     <>
       {playerHands.map((hand, i) => (
@@ -27,18 +24,18 @@ export default function Player({
           currHandIndex={playerObject.activeHandIndex}
         />
       ))}
-      {currPlayer == 0 && roundFinished == false && (
+      {gameInfo.currentPlayerIndex == 0 && gameInfo.roundFinished == false && (
         <>
           <button
             onClick={async () => {
-              await playerAction("hit");
+              await playerAction(userToken, "hit");
             }}>
             hit
           </button>
 
           <button
             onClick={async () => {
-              await playerAction("stand");
+              await playerAction(userToken, "stand");
             }}>
             stand
           </button>
@@ -47,14 +44,14 @@ export default function Player({
             <>
               <button
                 onClick={async () => {
-                  await playerAction("double");
+                  await playerAction(userToken, "double");
                 }}>
                 double
               </button>
               {checkForSameCardValue(activeHand) && (
                 <button
                   onClick={async () => {
-                    await playerAction("split");
+                    await playerAction(userToken, "split");
                   }}>
                   split
                 </button>
@@ -63,7 +60,7 @@ export default function Player({
           )}
         </>
       )}
-      {roundFinished == true && (
+      {gameInfo.roundFinished == true && (
         <button
           onClick={async () => {
             await newRoundAction();

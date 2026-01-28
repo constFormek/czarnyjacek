@@ -1,20 +1,25 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { handlePlayerAction, startRound } from "./GameLogic";
+import { createGameObject, getGameInfo, handlePlayerAction } from "./GameLogic";
 
 export async function refreshTable() {
   revalidatePath("/");
 }
 
-export async function playerAction(action: string) {
-  "use server";
-  handlePlayerAction(action);
+export async function playerAction(userToken: string, action: string) {
+  handlePlayerAction(userToken, action);
   refreshTable();
 }
 
 export async function newRoundAction() {
-  "use server";
-  startRound();
   refreshTable();
+}
+
+export async function getGameInfoAction(userToken: string) {
+  return getGameInfo(userToken);
+}
+
+export async function createGameObjectAction(userToken: string) {
+  return createGameObject(userToken);
 }

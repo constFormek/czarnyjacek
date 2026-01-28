@@ -13,7 +13,7 @@ export default function Hand({
   handID,
 }: HandProps) {
   return (
-    <div className={`${handID == currHandIndex && "bg-green-500/20"}`}>
+    <div className={`${handID == currHandIndex ? "bg-green-500/20" : ""}`}>
       <p>player: {displayCardSum(handCards)}</p>
       {handCards.map((card, i) => (
         <p key={i}>{translateCard(card)}</p>
